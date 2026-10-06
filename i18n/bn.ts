@@ -150,7 +150,12 @@ export const bn: Dictionary = {
     title: "প্যাকেজের অবস্থা",
     mandatoryReady: "বাধ্যতামূলক নথি প্রস্তুত",
     generate: "প্যাকেজ তৈরি করুন",
+    generating: "PDF প্যাকেজ তৈরি হচ্ছে…",
     hint: "সব বাধ্যতামূলক নথি মিলে গেলে সক্রিয় হবে।",
+    readyNotice: "সমস্ত শর্তাবলি যাচাই সম্পন্ন! চূড়ান্ত PDF তৈরির জন্য প্রস্তুত।",
+    downloadAgain: "প্যাকেজ পুনরায় ডাউনলোড করুন",
+    generatedSuccess: "প্যাকেজ সফলভাবে তৈরি হয়েছে!",
+    generatedDetails: "{pages} পৃষ্ঠা · {size}",
   },
   footer: {
     note: "সমস্ত প্রক্রিয়াকরণ আপনার ব্রাউজারেই সম্পন্ন হয়।",

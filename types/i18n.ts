@@ -111,7 +111,12 @@ export interface Dictionary {
     title: string;
     mandatoryReady: string;
     generate: string;
+    generating: string;
     hint: string;
+    readyNotice: string;
+    downloadAgain: string;
+    generatedSuccess: string;
+    generatedDetails: string;
   };
   footer: {
     note: string;

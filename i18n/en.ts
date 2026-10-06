@@ -150,7 +150,12 @@ export const en: Dictionary = {
     title: "Package Status",
     mandatoryReady: "mandatory documents ready",
     generate: "Generate Package",
+    generating: "Generating PDF Package…",
     hint: "Available once all mandatory documents are matched.",
+    readyNotice: "All requirements verified! Ready to compile final PDF.",
+    downloadAgain: "Download Package Again",
+    generatedSuccess: "Package Generated Successfully!",
+    generatedDetails: "{pages} pages · {size}",
   },
   footer: {
     note: "All processing happens locally in your browser.",

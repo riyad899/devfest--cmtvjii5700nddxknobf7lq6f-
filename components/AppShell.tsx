@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { useRequirementsLoader } from "@/hooks/useRequirementsLoader";
 import { getRequirementStats } from "@/lib/requirements";
 import { evaluateAllRequirements } from "@/lib/validation";
+import { generatePdfPackage, downloadPdfBlob } from "@/lib/pdf";
 import { AppHeader } from "./layout/AppHeader";
 import { AppFooter } from "./layout/AppFooter";
 import { TenderOverview } from "./tender/TenderOverview";
@@ -38,6 +39,14 @@ function Workspace() {
   const upload = useUploadedDocuments();
   const matching = useDocumentMatching(upload.eligibleDocuments);
   const [expiryDates, setExpiryDates] = useState<Record<string, string>>({});
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [lastGenerated, setLastGenerated] = useState<{
+    fileName: string;
+    pageCount: number;
+    byteSize: number;
+    blob: Blob;
+  } | null>(null);
 
   const { data } = loader;
   const stats = useMemo(() => (data ? getRequirementStats(data.requirements) : null), [data]);
@@ -81,10 +90,43 @@ function Workspace() {
 
   const handleClearTender = () => {
     setExpiryDates({});
+    setLastGenerated(null);
+    setGenerationError(null);
     matching.clearAll();
     upload.clearAllDocuments();
     upload.dismissRejections();
     loader.reset();
+  };
+
+  const handleGeneratePackage = async () => {
+    if (!data || !summary.canGenerate) return;
+    setIsGenerating(true);
+    setGenerationError(null);
+    try {
+      const result = await generatePdfPackage({
+        tender: data.tender,
+        requirements: data.requirements,
+        matches: matching.matches,
+        documents: upload.eligibleDocuments,
+        expiryDates,
+      });
+
+      setLastGenerated({
+        fileName: result.fileName,
+        pageCount: result.pageCount,
+        byteSize: result.byteSize,
+        blob: result.blob,
+      });
+
+      // Prompt browser download
+      downloadPdfBlob(result.blob, result.fileName);
+    } catch (err) {
+      setGenerationError(
+        err instanceof Error ? err.message : "Failed to generate PDF package.",
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (!data || !stats) {
@@ -102,11 +144,13 @@ function Workspace() {
   }
 
   const activeStep =
-    summary.canGenerate
-      ? "review"
-      : Object.keys(matching.matches).length > 0
-        ? "match"
-        : "upload";
+    lastGenerated
+      ? "generate"
+      : summary.canGenerate
+        ? "review"
+        : Object.keys(matching.matches).length > 0
+          ? "match"
+          : "upload";
 
   return (
     <>
@@ -144,6 +188,20 @@ function Workspace() {
             stats={stats}
             readyMandatory={readyMandatory}
             canGenerate={summary.canGenerate}
+            isGenerating={isGenerating}
+            onGenerate={handleGeneratePackage}
+            lastGenerated={
+              lastGenerated
+                ? {
+                    fileName: lastGenerated.fileName,
+                    pageCount: lastGenerated.pageCount,
+                    byteSize: lastGenerated.byteSize,
+                    onDownload: () =>
+                      downloadPdfBlob(lastGenerated.blob, lastGenerated.fileName),
+                  }
+                : null
+            }
+            error={generationError}
           />
         </aside>
       </div>

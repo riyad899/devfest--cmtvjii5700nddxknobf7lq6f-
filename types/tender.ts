@@ -4,12 +4,15 @@
 
 export interface TenderInfo {
   tender_id: string;
+  id?: string;
   title: string;
   procuring_entity: string;
   bidder: string;
   /** ISO date string (YYYY-MM-DD) */
   submission_deadline: string;
 }
+
+export type TenderMetadata = TenderInfo;
 
 export interface Requirement {
   id: string;
