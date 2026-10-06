@@ -156,8 +156,8 @@ function Workspace() {
     <>
       <LoadedFileBar fileName={loader.fileName ?? ""} onFile={loader.loadFile} onClear={handleClearTender} />
       <TenderOverview tender={data.tender} stats={stats} />
-      <ValidationSummaryCard summary={summary} />
       <WorkflowSteps activeStep={activeStep} />
+      <ValidationSummaryCard summary={summary} />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="min-w-0 lg:col-span-2">
           <RequirementsChecklist

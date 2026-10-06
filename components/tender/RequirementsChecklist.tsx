@@ -204,10 +204,12 @@ export function RequirementsChecklist({
                   key={req.id}
                   id={`requirement-${req.id}`}
                   className={cn(
-                    "group transition-colors",
-                    matchedDoc
-                      ? "bg-indigo-50/15 hover:bg-indigo-50/35"
-                      : "hover:bg-slate-50/70",
+                    "group transition-colors border-l-4",
+                    currentStatus === "OK" && "border-l-emerald-500 bg-emerald-50/10 hover:bg-emerald-50/25",
+                    currentStatus === "MISSING" && "border-l-rose-400 bg-rose-50/10 hover:bg-rose-50/25",
+                    currentStatus === "EXPIRY_NEEDED" && "border-l-amber-400 bg-amber-50/15 hover:bg-amber-50/30",
+                    currentStatus === "EXPIRED" && "border-l-red-500 bg-red-50/15 hover:bg-red-50/30",
+                    currentStatus === "NOT_PROVIDED" && "border-l-slate-200 hover:bg-slate-50/70",
                   )}
                 >
                   <td className="px-4 py-4 align-top">
@@ -216,7 +218,14 @@ export function RequirementsChecklist({
                     </span>
                   </td>
                   <td className="px-3 py-4 align-top">
-                    <p lang="en" className="font-medium text-slate-900">
+                    <p
+                      lang="en"
+                      className={cn(
+                        language === "en"
+                          ? "font-semibold text-slate-900"
+                          : "font-medium text-slate-600",
+                      )}
+                    >
                       {req.title_en}
                     </p>
                     <p className="mt-0.5 font-mono text-[11px] text-slate-400">
@@ -224,7 +233,14 @@ export function RequirementsChecklist({
                     </p>
                   </td>
                   <td className="px-3 py-4 align-top">
-                    <p lang="bn" className="font-medium text-slate-800">
+                    <p
+                      lang="bn"
+                      className={cn(
+                        language === "bn"
+                          ? "font-semibold text-slate-900"
+                          : "font-medium text-slate-600",
+                      )}
+                    >
                       {req.title_bn}
                     </p>
                   </td>
