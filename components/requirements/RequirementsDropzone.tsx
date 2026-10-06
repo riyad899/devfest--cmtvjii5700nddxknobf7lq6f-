@@ -12,11 +12,12 @@ interface RequirementsDropzoneProps {
   errors: ValidationError[];
   fileName: string | null;
   onFile: (file: File) => void;
+  onLoadDefault?: () => void;
 }
 
 /** Empty / loading / error state for selecting requirements.json. */
-export function RequirementsDropzone({ status, errors, fileName, onFile }: RequirementsDropzoneProps) {
-  const { t } = useLanguage();
+export function RequirementsDropzone({ status, errors, fileName, onFile, onLoadDefault }: RequirementsDropzoneProps) {
+  const { t, language } = useLanguage();
   const { open, inputProps } = useJsonFilePicker(onFile);
   const [isDragging, setIsDragging] = useState(false);
   const isLoading = status === "loading";
@@ -90,6 +91,22 @@ export function RequirementsDropzone({ status, errors, fileName, onFile }: Requi
             </svg>
             {status === "error" ? t.errors.tryAgain : t.loader.browse}
           </button>
+
+          {onLoadDefault && (
+            <button
+              id="requirements-load-default-button"
+              type="button"
+              onClick={onLoadDefault}
+              disabled={isLoading}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 text-indigo-600" aria-hidden>
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {language === "bn" ? "ডিফল্ট requirements.json লোড করুন" : "Load Default requirements.json"}
+            </button>
+          )}
+
           <p className="mt-3 text-xs text-slate-400">{t.loader.hint}</p>
         </div>
 
