@@ -5,11 +5,11 @@
  */
 
 export type RequirementStatus =
-  | "pending"
-  | "matched"
-  | "missing"
-  | "expired"
-  | "needs_review";
+  | "MISSING"
+  | "EXPIRY_NEEDED"
+  | "EXPIRED"
+  | "NOT_PROVIDED"
+  | "OK";
 
 export type DocumentProcessingStatus = "processing" | "ready";
 

@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 import { useRequirementsLoader } from "@/hooks/useRequirementsLoader";
 import { getRequirementStats } from "@/lib/requirements";
+import { evaluateAllRequirements } from "@/lib/validation";
 import { AppHeader } from "./layout/AppHeader";
 import { AppFooter } from "./layout/AppFooter";
 import { TenderOverview } from "./tender/TenderOverview";
 import { RequirementsChecklist } from "./tender/RequirementsChecklist";
+import { ValidationSummaryCard } from "./tender/ValidationSummaryCard";
 import { WorkflowSteps } from "./workflow/WorkflowSteps";
 import { useUploadedDocuments } from "@/hooks/useUploadedDocuments";
 import { useDocumentMatching } from "@/hooks/useDocumentMatching";
@@ -35,17 +37,50 @@ function Workspace() {
   const loader = useRequirementsLoader();
   const upload = useUploadedDocuments();
   const matching = useDocumentMatching(upload.eligibleDocuments);
+  const [expiryDates, setExpiryDates] = useState<Record<string, string>>({});
+
   const { data } = loader;
   const stats = useMemo(() => (data ? getRequirementStats(data.requirements) : null), [data]);
+
+  const { evaluations, summary } = useMemo(() => {
+    if (!data) {
+      return {
+        evaluations: {},
+        summary: {
+          total: 0,
+          ok: 0,
+          missing: 0,
+          expiryNeeded: 0,
+          expired: 0,
+          notProvided: 0,
+          canGenerate: false,
+        },
+      };
+    }
+    return evaluateAllRequirements(
+      data.requirements,
+      matching.matches,
+      expiryDates,
+      data.tender.submission_deadline,
+    );
+  }, [data, matching.matches, expiryDates]);
 
   const readyMandatory = useMemo(() => {
     if (!data) return 0;
     return data.requirements.filter(
-      (r) => r.mandatory && !!matching.matches[r.id],
+      (r) => r.mandatory && evaluations[r.id]?.status === "OK",
     ).length;
-  }, [data, matching.matches]);
+  }, [data, evaluations]);
+
+  const handleExpiryChange = (requirementId: string, date: string) => {
+    setExpiryDates((prev) => ({
+      ...prev,
+      [requirementId]: date,
+    }));
+  };
 
   const handleClearTender = () => {
+    setExpiryDates({});
     matching.clearAll();
     upload.clearAllDocuments();
     upload.dismissRejections();
@@ -67,12 +102,17 @@ function Workspace() {
   }
 
   const activeStep =
-    Object.keys(matching.matches).length > 0 ? "match" : "upload";
+    summary.canGenerate
+      ? "review"
+      : Object.keys(matching.matches).length > 0
+        ? "match"
+        : "upload";
 
   return (
     <>
       <LoadedFileBar fileName={loader.fileName ?? ""} onFile={loader.loadFile} onClear={handleClearTender} />
       <TenderOverview tender={data.tender} stats={stats} />
+      <ValidationSummaryCard summary={summary} />
       <WorkflowSteps activeStep={activeStep} />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="min-w-0 lg:col-span-2">
@@ -80,8 +120,12 @@ function Workspace() {
             requirements={data.requirements}
             matches={matching.matches}
             eligibleDocs={upload.eligibleDocuments}
+            evaluations={evaluations}
+            expiryDates={expiryDates}
+            submissionDeadline={data.tender.submission_deadline}
             onAssign={matching.assign}
             onUnassign={matching.unassign}
+            onExpiryChange={handleExpiryChange}
           />
         </div>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
@@ -96,7 +140,11 @@ function Workspace() {
             onDismissRejections={upload.dismissRejections}
             onDismissRejection={upload.dismissRejection}
           />
-          <PackageStatus stats={stats} readyMandatory={readyMandatory} />
+          <PackageStatus
+            stats={stats}
+            readyMandatory={readyMandatory}
+            canGenerate={summary.canGenerate}
+          />
         </aside>
       </div>
     </>

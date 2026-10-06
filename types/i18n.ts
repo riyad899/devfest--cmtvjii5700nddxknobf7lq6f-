@@ -1,5 +1,5 @@
 import type { ExpectedType, ValidationErrorCode } from "./validation";
-import type { WorkflowStepId, FileRejectionCode } from "./document";
+import type { WorkflowStepId, FileRejectionCode, RequirementStatus } from "./document";
 
 export type Language = "en" | "bn";
 
@@ -48,6 +48,20 @@ export interface Dictionary {
     noEligibleFiles: string;
     alreadyAssignedTo: string;
     pageLabel: string;
+    expiryDateLabel: string;
+    statusLabel: string;
+  };
+  status: Record<RequirementStatus, string>;
+  validationSummary: {
+    title: string;
+    total: string;
+    ok: string;
+    missing: string;
+    expiryNeeded: string;
+    expired: string;
+    notProvided: string;
+    readyToGenerate: string;
+    blockingWarning: string;
   };
   loader: {
     title: string;

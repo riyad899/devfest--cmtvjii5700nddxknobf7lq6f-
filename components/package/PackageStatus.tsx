@@ -3,16 +3,24 @@
 import type { RequirementStats } from "@/types";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { formatNumber } from "@/utils/format";
+import { cn } from "@/utils/cn";
 
 interface PackageStatusProps {
   stats: RequirementStats;
   /** Number of mandatory requirements satisfied (0 until matching exists). */
   readyMandatory?: number;
+  canGenerate?: boolean;
 }
 
-export function PackageStatus({ stats, readyMandatory = 0 }: PackageStatusProps) {
+export function PackageStatus({
+  stats,
+  readyMandatory = 0,
+  canGenerate = false,
+}: PackageStatusProps) {
   const { t, language } = useLanguage();
-  const percent = stats.mandatory ? Math.round((readyMandatory / stats.mandatory) * 100) : 0;
+  const percent = stats.mandatory
+    ? Math.min(100, Math.round((readyMandatory / stats.mandatory) * 100))
+    : 0;
 
   return (
     <section
@@ -27,8 +35,12 @@ export function PackageStatus({ stats, readyMandatory = 0 }: PackageStatusProps)
         <span className="text-3xl font-bold text-slate-900">
           {formatNumber(readyMandatory, language)}
         </span>
-        <span className="text-slate-400">/ {formatNumber(stats.mandatory, language)}</span>
-        <span className="ml-1 text-sm text-slate-500">{t.package.mandatoryReady}</span>
+        <span className="text-slate-400">
+          / {formatNumber(stats.mandatory, language)}
+        </span>
+        <span className="ml-1 text-sm text-slate-500">
+          {t.package.mandatoryReady}
+        </span>
       </div>
 
       <div
@@ -39,7 +51,12 @@ export function PackageStatus({ stats, readyMandatory = 0 }: PackageStatusProps)
         aria-valuenow={percent}
       >
         <div
-          className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
+          className={cn(
+            "h-full rounded-full transition-all duration-500",
+            canGenerate
+              ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+              : "bg-gradient-to-r from-indigo-500 to-violet-500",
+          )}
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -47,12 +64,22 @@ export function PackageStatus({ stats, readyMandatory = 0 }: PackageStatusProps)
       <button
         id="generate-package-button"
         type="button"
-        disabled
-        className="mt-6 w-full cursor-not-allowed rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white opacity-40"
+        disabled={!canGenerate}
+        className={cn(
+          "mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold transition shadow-sm",
+          canGenerate
+            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-emerald-500/20 active:scale-98 cursor-pointer"
+            : "bg-slate-900 text-white opacity-40 cursor-not-allowed",
+        )}
       >
         {t.package.generate}
       </button>
-      <p className="mt-2 text-center text-xs text-slate-500">{t.package.hint}</p>
+
+      <p className="mt-2 text-center text-xs text-slate-500">
+        {canGenerate
+          ? t.validationSummary.readyToGenerate
+          : t.package.hint}
+      </p>
     </section>
   );
 }
