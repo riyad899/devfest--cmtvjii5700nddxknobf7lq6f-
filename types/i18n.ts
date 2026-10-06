@@ -40,6 +40,14 @@ export interface Dictionary {
     expiryRequired: string;
     expiryNotRequired: string;
     awaiting: string;
+    matchedDoc: string;
+    assignFile: string;
+    unassignFile: string;
+    changeFile: string;
+    selectFilePrompt: string;
+    noEligibleFiles: string;
+    alreadyAssignedTo: string;
+    pageLabel: string;
   };
   loader: {
     title: string;

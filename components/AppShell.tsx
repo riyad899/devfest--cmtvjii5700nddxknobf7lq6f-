@@ -10,6 +10,7 @@ import { TenderOverview } from "./tender/TenderOverview";
 import { RequirementsChecklist } from "./tender/RequirementsChecklist";
 import { WorkflowSteps } from "./workflow/WorkflowSteps";
 import { useUploadedDocuments } from "@/hooks/useUploadedDocuments";
+import { useDocumentMatching } from "@/hooks/useDocumentMatching";
 import { DocumentUploadSection } from "./upload/DocumentUploadSection";
 import { PackageStatus } from "./package/PackageStatus";
 import { RequirementsDropzone } from "./requirements/RequirementsDropzone";
@@ -33,10 +34,19 @@ export function AppShell() {
 function Workspace() {
   const loader = useRequirementsLoader();
   const upload = useUploadedDocuments();
+  const matching = useDocumentMatching(upload.eligibleDocuments);
   const { data } = loader;
   const stats = useMemo(() => (data ? getRequirementStats(data.requirements) : null), [data]);
 
+  const readyMandatory = useMemo(() => {
+    if (!data) return 0;
+    return data.requirements.filter(
+      (r) => r.mandatory && !!matching.matches[r.id],
+    ).length;
+  }, [data, matching.matches]);
+
   const handleClearTender = () => {
+    matching.clearAll();
     upload.clearAllDocuments();
     upload.dismissRejections();
     loader.reset();
@@ -56,14 +66,23 @@ function Workspace() {
     );
   }
 
+  const activeStep =
+    Object.keys(matching.matches).length > 0 ? "match" : "upload";
+
   return (
     <>
       <LoadedFileBar fileName={loader.fileName ?? ""} onFile={loader.loadFile} onClear={handleClearTender} />
       <TenderOverview tender={data.tender} stats={stats} />
-      <WorkflowSteps activeStep="upload" />
+      <WorkflowSteps activeStep={activeStep} />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="min-w-0 lg:col-span-2">
-          <RequirementsChecklist requirements={data.requirements} />
+          <RequirementsChecklist
+            requirements={data.requirements}
+            matches={matching.matches}
+            eligibleDocs={upload.eligibleDocuments}
+            onAssign={matching.assign}
+            onUnassign={matching.unassign}
+          />
         </div>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           <DocumentUploadSection
@@ -77,7 +96,7 @@ function Workspace() {
             onDismissRejections={upload.dismissRejections}
             onDismissRejection={upload.dismissRejection}
           />
-          <PackageStatus stats={stats} />
+          <PackageStatus stats={stats} readyMandatory={readyMandatory} />
         </aside>
       </div>
     </>
