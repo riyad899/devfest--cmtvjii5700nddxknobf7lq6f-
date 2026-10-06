@@ -4,7 +4,7 @@ import type { Requirement, UploadedDocument, RequirementStatus } from "@/types";
 import type { MatchesMap } from "@/lib/matching";
 import type { RequirementEvaluation } from "@/lib/validation";
 import { useLanguage } from "@/i18n/LanguageProvider";
-import { formatFileSize, formatNumber } from "@/utils/format";
+import { formatFileSize, formatNumber, formatDate } from "@/utils/format";
 import { cn } from "@/utils/cn";
 
 interface RequirementsChecklistProps {
@@ -280,8 +280,8 @@ export function RequirementsChecklist({
                               title={t.requirements.expiryDateLabel}
                             />
                             {submissionDeadline && (
-                              <p className="mt-0.5 text-[10px] text-slate-400 font-mono">
-                                DL: {submissionDeadline}
+                              <p className="mt-0.5 text-[10px] text-slate-500 font-medium">
+                                {t.tender.deadline}: {formatDate(submissionDeadline, language)}
                               </p>
                             )}
                           </div>
@@ -382,11 +382,19 @@ export function RequirementsChecklist({
                                   ([rId, dId]) =>
                                     dId === d.id && rId !== req.id,
                                 )?.[0];
+                                const otherReq = otherReqId
+                                  ? requirements.find((r) => r.id === otherReqId)
+                                  : undefined;
+                                const otherTitle = otherReq
+                                  ? language === "bn"
+                                    ? otherReq.title_bn
+                                    : otherReq.title_en
+                                  : otherReqId;
                                 return (
                                   <option key={d.id} value={d.id}>
-                                    {d.fileName} ({d.pageCount ?? 0}p)
-                                    {otherReqId
-                                      ? ` [${t.requirements.alreadyAssignedTo.replace("{id}", otherReqId)}]`
+                                    {d.fileName} ({formatNumber(d.pageCount ?? 0, language)} {t.requirements.pageLabel})
+                                    {otherTitle
+                                      ? ` [${t.requirements.alreadyAssignedTo.replace("{id}", otherTitle)}]`
                                       : ""}
                                   </option>
                                 );
@@ -437,11 +445,19 @@ export function RequirementsChecklist({
                           const otherReqId = Object.entries(matches).find(
                             ([rId, dId]) => dId === d.id && rId !== req.id,
                           )?.[0];
+                          const otherReq = otherReqId
+                            ? requirements.find((r) => r.id === otherReqId)
+                            : undefined;
+                          const otherTitle = otherReq
+                            ? language === "bn"
+                              ? otherReq.title_bn
+                              : otherReq.title_en
+                            : otherReqId;
                           return (
                             <option key={d.id} value={d.id}>
-                              {d.fileName} ({d.pageCount ?? 0}p)
-                              {otherReqId
-                                ? ` [${t.requirements.alreadyAssignedTo.replace("{id}", otherReqId)}]`
+                              {d.fileName} ({formatNumber(d.pageCount ?? 0, language)} {t.requirements.pageLabel})
+                              {otherTitle
+                                ? ` [${t.requirements.alreadyAssignedTo.replace("{id}", otherTitle)}]`
                                 : ""}
                             </option>
                           );

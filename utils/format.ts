@@ -38,6 +38,6 @@ export function formatFileSize(bytes: number, language: Language): string {
     return `${language === "bn" ? toBengaliDigits(formatted) : formatted} KB`;
   }
   const mb = kb / 1024;
-  const formatted = mb.toFixed(2).replace(/\.00$/, "");
+  const formatted = mb.toFixed(2).replace(/\.?0+$/, "");
   return `${language === "bn" ? toBengaliDigits(formatted) : formatted} MB`;
 }

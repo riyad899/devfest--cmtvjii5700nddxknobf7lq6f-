@@ -117,6 +117,7 @@ export interface Dictionary {
     downloadAgain: string;
     generatedSuccess: string;
     generatedDetails: string;
+    generationFailed: string;
   };
   footer: {
     note: string;

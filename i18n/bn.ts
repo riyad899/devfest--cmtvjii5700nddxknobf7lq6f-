@@ -156,6 +156,7 @@ export const bn: Dictionary = {
     downloadAgain: "প্যাকেজ পুনরায় ডাউনলোড করুন",
     generatedSuccess: "প্যাকেজ সফলভাবে তৈরি হয়েছে!",
     generatedDetails: "{pages} পৃষ্ঠা · {size}",
+    generationFailed: "প্যাকেজ তৈরিতে ত্রুটি হয়েছে",
   },
   footer: {
     note: "সমস্ত প্রক্রিয়াকরণ আপনার ব্রাউজারেই সম্পন্ন হয়।",

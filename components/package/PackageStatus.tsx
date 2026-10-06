@@ -75,7 +75,7 @@ export function PackageStatus({
 
       {error && (
         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-          <p className="font-semibold">Generation Failed</p>
+          <p className="font-semibold">{t.package.generationFailed}</p>
           <p className="mt-0.5">{error}</p>
         </div>
       )}

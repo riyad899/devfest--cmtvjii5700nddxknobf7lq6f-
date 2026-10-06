@@ -156,6 +156,7 @@ export const en: Dictionary = {
     downloadAgain: "Download Package Again",
     generatedSuccess: "Package Generated Successfully!",
     generatedDetails: "{pages} pages · {size}",
+    generationFailed: "Package Generation Failed",
   },
   footer: {
     note: "All processing happens locally in your browser.",
