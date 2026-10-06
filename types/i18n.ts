@@ -1,3 +1,6 @@
+import type { ExpectedType, ValidationErrorCode } from "./validation";
+import type { WorkflowStepId } from "./document";
+
 export type Language = "en" | "bn";
 
 export interface Dictionary {
@@ -23,17 +26,40 @@ export interface Dictionary {
     optional: string;
     withExpiry: string;
   };
-  steps: Record<
-    "upload" | "match" | "review" | "generate",
-    { title: string; description: string }
-  >;
+  steps: Record<WorkflowStepId, { title: string; description: string }>;
   requirements: {
     title: string;
     subtitle: string;
+    order: string;
+    titleEn: string;
+    titleBn: string;
+    type: string;
+    expiry: string;
     mandatory: string;
     optional: string;
-    hasExpiry: string;
+    expiryRequired: string;
+    expiryNotRequired: string;
     awaiting: string;
+  };
+  loader: {
+    title: string;
+    description: string;
+    dropzone: string;
+    browse: string;
+    hint: string;
+    loading: string;
+    loadedFrom: string;
+    replace: string;
+    clear: string;
+    privacy: string;
+  };
+  errors: {
+    title: string;
+    subtitle: string;
+    moreErrors: string;
+    tryAgain: string;
+    codes: Record<ValidationErrorCode, string>;
+    expected: Record<ExpectedType, string>;
   };
   upload: {
     title: string;

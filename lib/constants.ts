@@ -1,6 +1,7 @@
 import type { WorkflowStepId } from "@/types";
 
 export const WORKFLOW_STEPS: WorkflowStepId[] = [
+  "requirements",
   "upload",
   "match",
   "review",

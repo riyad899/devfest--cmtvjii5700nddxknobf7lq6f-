@@ -16,7 +16,7 @@ export function WorkflowSteps({ activeStep }: WorkflowStepsProps) {
 
   return (
     <nav aria-label="Workflow" className="animate-fade-up [animation-delay:80ms]">
-      <ol className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {WORKFLOW_STEPS.map((step, index) => {
           const isActive = index === activeIndex;
           const isDone = index < activeIndex;

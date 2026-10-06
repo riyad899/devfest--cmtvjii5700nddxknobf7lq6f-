@@ -29,4 +29,4 @@ export interface RequirementMatch {
   expiryDate?: string | null;
 }
 
-export type WorkflowStepId = "upload" | "match" | "review" | "generate";
+export type WorkflowStepId = "requirements" | "upload" | "match" | "review" | "generate";
