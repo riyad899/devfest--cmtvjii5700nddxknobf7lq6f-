@@ -26,3 +26,18 @@ export function formatDate(isoDate: string, language: Language): string {
     timeZone: "UTC",
   }).format(date);
 }
+
+/** Format file size in bytes to human-readable string (KB, MB). */
+export function formatFileSize(bytes: number, language: Language): string {
+  if (bytes < 1024) {
+    return `${formatNumber(bytes, language)} B`;
+  }
+  const kb = bytes / 1024;
+  if (kb < 1024) {
+    const formatted = kb.toFixed(1).replace(/\.0$/, "");
+    return `${language === "bn" ? toBengaliDigits(formatted) : formatted} KB`;
+  }
+  const mb = kb / 1024;
+  const formatted = mb.toFixed(2).replace(/\.00$/, "");
+  return `${language === "bn" ? toBengaliDigits(formatted) : formatted} MB`;
+}

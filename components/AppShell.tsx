@@ -9,7 +9,8 @@ import { AppFooter } from "./layout/AppFooter";
 import { TenderOverview } from "./tender/TenderOverview";
 import { RequirementsChecklist } from "./tender/RequirementsChecklist";
 import { WorkflowSteps } from "./workflow/WorkflowSteps";
-import { UploadPlaceholder } from "./upload/UploadPlaceholder";
+import { useUploadedDocuments } from "@/hooks/useUploadedDocuments";
+import { DocumentUploadSection } from "./upload/DocumentUploadSection";
 import { PackageStatus } from "./package/PackageStatus";
 import { RequirementsDropzone } from "./requirements/RequirementsDropzone";
 import { LoadedFileBar } from "./requirements/LoadedFileBar";
@@ -31,8 +32,15 @@ export function AppShell() {
 
 function Workspace() {
   const loader = useRequirementsLoader();
+  const upload = useUploadedDocuments();
   const { data } = loader;
   const stats = useMemo(() => (data ? getRequirementStats(data.requirements) : null), [data]);
+
+  const handleClearTender = () => {
+    upload.clearAllDocuments();
+    upload.dismissRejections();
+    loader.reset();
+  };
 
   if (!data || !stats) {
     return (
@@ -50,7 +58,7 @@ function Workspace() {
 
   return (
     <>
-      <LoadedFileBar fileName={loader.fileName ?? ""} onFile={loader.loadFile} onClear={loader.reset} />
+      <LoadedFileBar fileName={loader.fileName ?? ""} onFile={loader.loadFile} onClear={handleClearTender} />
       <TenderOverview tender={data.tender} stats={stats} />
       <WorkflowSteps activeStep="upload" />
       <div className="grid gap-6 lg:grid-cols-3">
@@ -58,7 +66,17 @@ function Workspace() {
           <RequirementsChecklist requirements={data.requirements} />
         </div>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <UploadPlaceholder />
+          <DocumentUploadSection
+            documents={upload.documents}
+            rejections={upload.rejections}
+            isProcessing={upload.isProcessing}
+            totalBytes={upload.totalBytes}
+            onFilesSelected={upload.addFiles}
+            onRemoveDocument={upload.removeDocument}
+            onClearAll={upload.clearAllDocuments}
+            onDismissRejections={upload.dismissRejections}
+            onDismissRejection={upload.dismissRejection}
+          />
           <PackageStatus stats={stats} />
         </aside>
       </div>

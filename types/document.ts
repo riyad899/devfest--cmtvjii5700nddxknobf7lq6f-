@@ -11,14 +11,36 @@ export type RequirementStatus =
   | "expired"
   | "needs_review";
 
+export type DocumentProcessingStatus = "processing" | "ready";
+
 export interface UploadedDocument {
   id: string;
+  /** Original browser File — kept in memory only, never sent anywhere. */
+  file: File;
   fileName: string;
   /** Size in bytes */
   fileSize: number;
-  pageCount?: number;
-  /** ISO timestamp */
-  uploadedAt: string;
+  /** null while the PDF is still being read */
+  pageCount: number | null;
+  isEncrypted: boolean;
+  status: DocumentProcessingStatus;
+  /** epoch ms */
+  addedAt: number;
+}
+
+export type FileRejectionCode =
+  | "not_pdf"
+  | "file_empty"
+  | "too_many_files"
+  | "total_size_exceeded"
+  | "invalid_signature"
+  | "corrupt_pdf"
+  | "no_pages"
+  | "read_failed";
+
+export interface FileRejection {
+  fileName: string;
+  code: FileRejectionCode;
 }
 
 export interface RequirementMatch {

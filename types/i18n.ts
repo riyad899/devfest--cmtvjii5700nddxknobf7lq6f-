@@ -1,5 +1,5 @@
 import type { ExpectedType, ValidationErrorCode } from "./validation";
-import type { WorkflowStepId } from "./document";
+import type { WorkflowStepId, FileRejectionCode } from "./document";
 
 export type Language = "en" | "bn";
 
@@ -65,7 +65,21 @@ export interface Dictionary {
     title: string;
     description: string;
     dropzone: string;
-    comingSoon: string;
+    browse: string;
+    hint: string;
+    limits: string;
+    processing: string;
+    uploadedCount: string;
+    totalSize: string;
+    clearAll: string;
+    remove: string;
+    pageCount: string;
+    readingPages: string;
+    encrypted: string;
+    noFilesYet: string;
+    rejectionsTitle: string;
+    dismiss: string;
+    errors: Record<FileRejectionCode, string>;
   };
   package: {
     title: string;
