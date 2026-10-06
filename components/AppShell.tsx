@@ -138,7 +138,6 @@ function Workspace() {
           errors={loader.errors}
           fileName={loader.fileName}
           onFile={loader.loadFile}
-          onLoadDefault={loader.loadDefault}
         />
       </>
     );
