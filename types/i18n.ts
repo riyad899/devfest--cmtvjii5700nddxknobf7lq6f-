@@ -76,6 +76,10 @@ export interface Dictionary {
     pageCount: string;
     readingPages: string;
     encrypted: string;
+    duplicateBadge: string;
+    duplicateOfText: string;
+    duplicateExcludedNotice: string;
+    duplicatesCountNotice: string;
     noFilesYet: string;
     rejectionsTitle: string;
     dismiss: string;

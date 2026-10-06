@@ -24,6 +24,14 @@ export interface UploadedDocument {
   pageCount: number | null;
   isEncrypted: boolean;
   status: DocumentProcessingStatus;
+  /** SHA-256 hash of file contents computed in browser */
+  hash?: string;
+  /** True if another file with identical content was already uploaded */
+  isDuplicate?: boolean;
+  /** Original file name that this file duplicates */
+  duplicateOf?: string;
+  /** Original file ID that this file duplicates */
+  duplicateOfId?: string;
   /** epoch ms */
   addedAt: number;
 }

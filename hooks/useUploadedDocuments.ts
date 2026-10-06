@@ -3,8 +3,9 @@
 import { useCallback, useMemo, useState } from "react";
 import type { FileRejection, UploadedDocument } from "@/types";
 import { PDF_PROCESSING_CONCURRENCY } from "@/lib/constants";
-import { validateSelection } from "@/lib/upload";
+import { validateSelection, markDuplicateDocuments, getEligibleMatchingDocuments } from "@/lib/upload";
 import { readPdfInfo } from "@/lib/pdf";
+import { computeSha256 } from "@/lib/crypto";
 import { runWithConcurrency } from "@/utils/concurrency";
 
 export interface UseUploadedDocumentsReturn {
@@ -12,6 +13,8 @@ export interface UseUploadedDocumentsReturn {
   rejections: FileRejection[];
   isProcessing: boolean;
   totalBytes: number;
+  duplicateCount: number;
+  eligibleDocuments: UploadedDocument[];
   addFiles: (files: FileList | File[]) => Promise<void>;
   removeDocument: (id: string) => void;
   clearAllDocuments: () => void;
@@ -30,6 +33,16 @@ export function useUploadedDocuments(): UseUploadedDocumentsReturn {
 
   const isProcessing = useMemo(
     () => documents.some((d) => d.status === "processing"),
+    [documents],
+  );
+
+  const duplicateCount = useMemo(
+    () => documents.filter((d) => d.isDuplicate).length,
+    [documents],
+  );
+
+  const eligibleDocuments = useMemo(
+    () => getEligibleMatchingDocuments(documents),
     [documents],
   );
 
@@ -77,24 +90,35 @@ export function useUploadedDocuments(): UseUploadedDocumentsReturn {
         PDF_PROCESSING_CONCURRENCY,
         async (docItem) => {
           const file = docMap.get(docItem.id) ?? docItem.file;
-          const readResult = await readPdfInfo(file);
+
+          // Simultaneously parse PDF structure and compute SHA-256 hash using Web Crypto API
+          const [readResult, hashResult] = await Promise.all([
+            readPdfInfo(file),
+            computeSha256(file),
+          ]);
 
           if (readResult.ok) {
-            setDocuments((prev) =>
-              prev.map((d) =>
+            setDocuments((prev) => {
+              const updated = prev.map((d) =>
                 d.id === docItem.id
                   ? {
                       ...d,
                       pageCount: readResult.pageCount,
                       isEncrypted: readResult.isEncrypted,
-                      status: "ready",
+                      hash: hashResult,
+                      status: "ready" as const,
                     }
                   : d,
-              ),
-            );
+              );
+              // Re-evaluate duplicates across all documents
+              return markDuplicateDocuments(updated);
+            });
           } else {
             // Failed to parse or corrupt: remove from documents, add to rejections
-            setDocuments((prev) => prev.filter((d) => d.id !== docItem.id));
+            setDocuments((prev) => {
+              const remaining = prev.filter((d) => d.id !== docItem.id);
+              return markDuplicateDocuments(remaining);
+            });
             setRejections((prev) => [
               ...prev,
               { fileName: docItem.fileName, code: readResult.code },
@@ -107,7 +131,11 @@ export function useUploadedDocuments(): UseUploadedDocumentsReturn {
   );
 
   const removeDocument = useCallback((id: string) => {
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
+    setDocuments((prev) => {
+      const remaining = prev.filter((d) => d.id !== id);
+      // Re-evaluate duplicates: if a primary was removed, next copy is promoted
+      return markDuplicateDocuments(remaining);
+    });
   }, []);
 
   const clearAllDocuments = useCallback(() => {
@@ -127,6 +155,8 @@ export function useUploadedDocuments(): UseUploadedDocumentsReturn {
     rejections,
     isProcessing,
     totalBytes,
+    duplicateCount,
+    eligibleDocuments,
     addFiles,
     removeDocument,
     clearAllDocuments,

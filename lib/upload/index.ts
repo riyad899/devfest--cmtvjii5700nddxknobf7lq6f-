@@ -5,3 +5,8 @@ export {
   type SelectionLimits,
   type SelectionResult,
 } from "./validateSelection";
+export {
+  markDuplicateDocuments,
+  getEligibleMatchingDocuments,
+} from "./duplicates";
+
