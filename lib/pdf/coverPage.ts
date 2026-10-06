@@ -342,7 +342,7 @@ export async function drawCoverPage(
   });
 
   // 5. Official Footer / Notes at bottom
-  const footerY = 40;
+  const footerY = 46;
   page.drawLine({
     start: { x: marginX, y: footerY + 16 },
     end: { x: marginX + contentWidth, y: footerY + 16 },
@@ -371,16 +371,6 @@ export async function drawCoverPage(
       color: colorLightSlate,
     },
   );
-
-  const coverPageNotice = "Cover Page (Page 1)";
-  const coverNoticeWidth = fontRegular.widthOfTextAtSize(coverPageNotice, 7);
-  page.drawText(coverPageNotice, {
-    x: marginX + contentWidth - coverNoticeWidth,
-    y: footerY + 6,
-    size: 7,
-    font: fontRegular,
-    color: colorLightSlate,
-  });
 
   return page;
 }

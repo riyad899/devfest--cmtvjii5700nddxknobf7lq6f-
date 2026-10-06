@@ -2,6 +2,7 @@ import { PDFDocument } from "pdf-lib";
 import type { TenderMetadata, Requirement } from "@/types";
 import { evaluateAllRequirements } from "@/lib/validation";
 import { drawCoverPage, type IncludedDocumentInfo } from "./coverPage";
+import { stampPackageFooters } from "./footer";
 
 export interface PackageInputDocument {
   id: string;
@@ -57,11 +58,12 @@ async function getDocumentBytes(doc: PackageInputDocument): Promise<ArrayBuffer>
 
 /**
  * Builds the safe filename for the generated tender package.
- * e.g. "IFT-2026-0042_Tender_Submission_Package.pdf"
+ * Format: <tender_id>_Package.pdf
+ * e.g. "IFT-2026-0042_Package.pdf" or "T-2026-0417_Package.pdf"
  */
 export function buildPackageFileName(tenderId: string): string {
   const safeId = (tenderId || "Tender").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
-  return `${safeId}_Tender_Submission_Package.pdf`;
+  return `${safeId}_Package.pdf`;
 }
 
 /**
@@ -71,7 +73,8 @@ export function buildPackageFileName(tenderId: string): string {
  * - Appends matched PDFs according to requirement.order
  * - Preserves all pages and original page order for each document
  * - Skips optional requirements without matched files
- * - Returns a downloadable PDF Blob
+ * - Stamps footer on every page (including cover): "<tender_id> | Page X of Y"
+ * - Returns a downloadable PDF Blob with filename "<tender_id>_Package.pdf"
  */
 export async function generatePdfPackage(
   options: GeneratePackageOptions,
@@ -186,14 +189,22 @@ export async function generatePdfPackage(
     }
   }
 
-  // 8. Save the merged PDF bytes
+  // 8. Stamp pagination footers on EVERY page (including cover): "<tender_id> | Page X of Y"
+  const tenderId = (tender.id ?? tender.tender_id ?? "Tender").trim();
+  await stampPackageFooters(mergedDoc, {
+    tenderId,
+    fontSize: 8.5,
+    bottomOffset: 18,
+  });
+
+  // 9. Save the merged PDF bytes
   const pdfBytes = await mergedDoc.save();
   const arrayBuffer = pdfBytes.buffer.slice(
     pdfBytes.byteOffset,
     pdfBytes.byteOffset + pdfBytes.byteLength,
   ) as ArrayBuffer;
   const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-  const fileName = buildPackageFileName(tender.id ?? tender.tender_id ?? "Tender");
+  const fileName = buildPackageFileName(tenderId);
 
   return {
     blob,

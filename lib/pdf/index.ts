@@ -8,4 +8,5 @@ export {
   type GeneratedPackageResult,
   type PackageInputDocument,
 } from "./generatePackage";
+export { stampPackageFooters, type StampFootersOptions } from "./footer";
 export { downloadPdfBlob } from "./download";
